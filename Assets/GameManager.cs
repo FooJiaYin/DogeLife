@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance;
     // 以後再寫Inspector
@@ -18,10 +19,13 @@ public class GameManager : MonoBehaviour
         foodSpawners = FindObjectsOfType<foodSpawner>();
     }
 
-    void SpawnFood(GameObject food)
+    // [ClientRpc]
+    void SpawnFood(GameObject food, int foodSpawnerIndex)
     {
-        var foodSpawnerIndex = Random.Range(0, foodSpawners.Length);
-        foodSpawners[foodSpawnerIndex].SpawnFood(food);
+        var newFood = foodSpawners[foodSpawnerIndex].SpawnFood(food);
+        Debug.Log(newFood.transform.position);
+        // NetworkClient.RegisterPrefab(newFood);
+        NetworkServer.Spawn(newFood);
     }
     void SpawnMan(GameObject man)
     {
@@ -43,11 +47,14 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!isServer) return;
+
         for (int i = 0; i < foods.Length; i++)
         {
             if (Time.time > nextFoodSwpanTimes[i])
             {
-                SpawnFood(foods[i]);
+                var foodSpawnerIndex = Random.Range(0, foodSpawners.Length);
+                SpawnFood(foods[i], foodSpawnerIndex);
                 nextFoodSwpanTimes[i] += foods[i].GetComponent<food>().foodSpawnInterval;
             }
         }
