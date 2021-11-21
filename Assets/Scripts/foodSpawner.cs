@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class foodSpawner : MonoBehaviour
 {
-    public void SpawnFood(GameObject food)
+    public GameObject SpawnFood(GameObject food)
     {
-        Instantiate(food, this.transform);
+        return Instantiate(food, this.transform.position, this.transform.rotation);
     }
     // Start is called before the first frame update
     void Start()

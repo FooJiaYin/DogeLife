@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror;
 
-public class player : MonoBehaviour
+public class player : NetworkBehaviour
 {
     int level = 1;
     float foodValue = 10;
@@ -26,6 +27,12 @@ public class player : MonoBehaviour
     public Text victoryValueDisplay;
     public Text levelDisplay;
 
+    public override void OnStartLocalPlayer()
+    {
+        // Camera.main.transform.SetParent(transform);
+        // Camera.main.transform.localPosition = new Vector3(0, 0, 0);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -34,6 +41,11 @@ public class player : MonoBehaviour
         waitingMan = emptyMan;
         emptyPlace = GameObject.Find("Empty").GetComponent<PlaceController>();
         enteredPlace = emptyPlace;
+        foodValueDisplay = GameObject.Find("FoodValueDisplay").GetComponent<Text>();
+        placeValueDisplay = GameObject.Find("PlaceValueDisplay").GetComponent<Text>();
+        socialValueDisplay = GameObject.Find("SocialValueDisplay").GetComponent<Text>();
+        victoryValueDisplay = GameObject.Find("VictoryValueDisplay").GetComponent<Text>();
+        levelDisplay = GameObject.Find("LevelDisplay").GetComponent<Text>();
         SetLevel(1);
     }
 
@@ -84,6 +96,7 @@ public class player : MonoBehaviour
 
     public void AddFoodValue(float value)
     {
+        if (!isLocalPlayer) return;
         foodValue += value;
         foodValueDisplay.text = this.foodValue + " ";
         if (foodValue >= 20 && level == 1)
@@ -97,6 +110,7 @@ public class player : MonoBehaviour
     }
     public void AddPlaceValue(float value)
     {
+        if (!isLocalPlayer) return;
         placeValue += value;
         placeValueDisplay.text = placeValue + " ";
         if (placeValue >= 20 && level == 2)
@@ -110,6 +124,7 @@ public class player : MonoBehaviour
     }
     public void AddSocialValue(float value)
     {
+        if (!isLocalPlayer) return;
         socialValue += value;
         socialValueDisplay.text = socialValue + " ";
         if (socialValue >= 20 && level == 3)
@@ -123,6 +138,7 @@ public class player : MonoBehaviour
     }
     public void AddVictoryValue(int value)
     {
+        if (!isLocalPlayer) return;
         victoryValue += value;
         victoryValueDisplay.text = victoryValue + " ";
         if (victoryValue >= 6)
@@ -136,6 +152,7 @@ public class player : MonoBehaviour
     }
     public void SetLevel(int value)
     {
+        if (!isLocalPlayer) return;
         level = value;
         if (level < 4)
         {
