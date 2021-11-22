@@ -48,3 +48,15 @@ NetworkServer.Spawn(newObject);
   - There should not be any game object instance in the scene because the instance will be independent in each client (not synced)
 - **Never** spawn game object as child to other game object, because `NetworkServer.Spawn()` takes its local transform as global transform.
   - If there is a need, we will have to write a custom spawn function
+
+# Volume
+1. Add `Volume.cs` to `GameManager` or any other game object
+2. Access the volume:
+    ```CSharp
+    // In GameManager (or any game object that Volume.cs is attached to)
+    Volume vol = gameObject.GetComponent<Volume>();
+    // In other game object
+    Volume vol = FindObjectOfType<Volume>();
+    // Example Usage
+    Debug.log(vol.volume); // vol.volume is a float
+    ```
