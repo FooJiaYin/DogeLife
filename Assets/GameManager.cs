@@ -23,7 +23,7 @@ public class GameManager : NetworkBehaviour
     void SpawnFood(GameObject food, int foodSpawnerIndex)
     {
         var newFood = foodSpawners[foodSpawnerIndex].SpawnFood(food);
-        Debug.Log(newFood.transform.position);
+        // Debug.Log(newFood.transform.position);
         // NetworkClient.RegisterPrefab(newFood);
         NetworkServer.Spawn(newFood);
     }
@@ -46,7 +46,8 @@ public class GameManager : NetworkBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+   {
+        // Spawn only at the server
         if (!isServer) return;
 
         for (int i = 0; i < foods.Length; i++)
