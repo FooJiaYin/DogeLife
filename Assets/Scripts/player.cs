@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using Cinemachine;
 
 public class player : NetworkBehaviour
 {
@@ -16,7 +17,7 @@ public class player : NetworkBehaviour
     [SyncVar(hook = nameof(setVictoryValue))]
     int victoryValue = 3;
     public uint netId;
-    
+
     [SyncVar]
     public float volumeValue = 0;
     Volume volume;
@@ -39,11 +40,15 @@ public class player : NetworkBehaviour
     public Text levelDisplay;
     public SpriteRenderer spriteRenderer;
     public Sprite[] sprites;
+    CinemachineVirtualCamera VirtualCamera;
 
     public override void OnStartLocalPlayer()
     {
         // Camera.main.transform.SetParent(transform);
         // Camera.main.transform.localPosition = new Vector3(0, 0, 0);
+        GameObject vcam = GameObject.FindWithTag("Virtual Camera");
+        if (vcam != null) VirtualCamera = vcam.GetComponent<CinemachineVirtualCamera>();
+        VirtualCamera.Follow = this.transform;
     }
 
     // Start is called before the first frame update
@@ -62,9 +67,10 @@ public class player : NetworkBehaviour
         socialValueDisplay = GameObject.Find("SocialValueDisplay").GetComponent<Text>();
         victoryValueDisplay = GameObject.Find("VictoryValueDisplay").GetComponent<Text>();
         levelDisplay = GameObject.Find("LevelDisplay").GetComponent<Text>();
-        string[] names = {"Tom", "Bob", "Alice", "Mikasa", "Alan", "John", "Mary", "Patrick"};
+        string[] names = { "Tom", "Bob", "Alice", "Mikasa", "Alan", "John", "Mary", "Patrick" };
         Color[] colors = { Color.yellow, Color.green, Color.blue, Color.red, Color.cyan, Color.magenta };
-        if (isLocalPlayer) { 
+        if (isLocalPlayer)
+        {
             name = names[Random.Range(0, names.Length)];
             placeColor = colors[Random.Range(0, colors.Length)];
             CmdSetName(name);
@@ -147,7 +153,7 @@ public class player : NetworkBehaviour
         this.placeColor = color;
     }
 
-    public void ChangeVolumeValue(float value) 
+    public void ChangeVolumeValue(float value)
     {
         volumeValueDisplay.text = value + "";
     }
