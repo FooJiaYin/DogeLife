@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 using Cinemachine;
+using TMPro;
 
 public class player : NetworkBehaviour
 {
@@ -28,16 +29,22 @@ public class player : NetworkBehaviour
     public PlaceController enteredPlace;
     PlaceController emptyPlace;
     float startPTime;
+    bool isPeeing = false;
+    [SerializeField] PeeingBar peeingBar;
     public float movespeed = 5f;
     Rigidbody2D rigidbody2D;
     Vector2 movement;
-    [Header("UI")]
+    [Header("UI Score board")]
     public Text volumeValueDisplay;
     public Text foodValueDisplay;
     public Text placeValueDisplay;
     public Text socialValueDisplay;
     public Text victoryValueDisplay;
     public Text levelDisplay;
+    public Text nameDisplay;
+
+    [Header("Player Display")]
+    public TextMeshPro playerNameText;
     public SpriteRenderer spriteRenderer;
     public Sprite[] sprites;
     CinemachineVirtualCamera VirtualCamera;
@@ -51,7 +58,6 @@ public class player : NetworkBehaviour
         VirtualCamera.Follow = this.transform;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
@@ -62,18 +68,19 @@ public class player : NetworkBehaviour
         enteredPlace = emptyPlace;
         volume = GameObject.Find("Volume").GetComponent<Volume>();
         volumeValueDisplay = GetComponentInChildren<Text>();
-        foodValueDisplay = GameObject.Find("FoodValueDisplay").GetComponent<Text>();
-        placeValueDisplay = GameObject.Find("PlaceValueDisplay").GetComponent<Text>();
-        socialValueDisplay = GameObject.Find("SocialValueDisplay").GetComponent<Text>();
-        victoryValueDisplay = GameObject.Find("VictoryValueDisplay").GetComponent<Text>();
+        foodValueDisplay = GameObject.Find("FoodValue").GetComponent<Text>();
+        placeValueDisplay = GameObject.Find("PlaceValue").GetComponent<Text>();
+        socialValueDisplay = GameObject.Find("SocialValue").GetComponent<Text>();
+        victoryValueDisplay = GameObject.Find("VictoryValue").GetComponent<Text>();
         levelDisplay = GameObject.Find("LevelDisplay").GetComponent<Text>();
-        string[] names = { "Tom", "Bob", "Alice", "Mikasa", "Alan", "John", "Mary", "Patrick" };
+        nameDisplay = GameObject.Find("PlayerNameDisplay").GetComponent<Text>();
+        if (peeingBar == null) peeingBar = GameObject.Find("Pee Bar").GetComponent<PeeingBar>();
+
         Color[] colors = { Color.yellow, Color.green, Color.blue, Color.red, Color.cyan, Color.magenta };
         if (isLocalPlayer)
         {
-            name = names[Random.Range(0, names.Length)];
+            InitPlayerName();
             placeColor = colors[Random.Range(0, colors.Length)];
-            CmdSetName(name);
             CmdSetColor(placeColor);
             netId = gameObject.GetComponent<NetworkIdentity>().netId;
         }
@@ -81,7 +88,15 @@ public class player : NetworkBehaviour
         updateLevel(1, level);
     }
 
-    // Update is called once per frame
+    void InitPlayerName()
+    {
+        string[] names = { "Tom", "Bob", "Alice", "Mikasa", "Alan", "John", "Mary", "Patrick" };
+        if (name == "") name = names[Random.Range(0, names.Length)];
+        CmdSetName(name);
+        playerNameText.text = name;
+        nameDisplay.text = name;
+    }
+
     void Update()
     {
         movement.x = Input.GetAxisRaw("Horizontal");
@@ -91,7 +106,10 @@ public class player : NetworkBehaviour
             if (Input.GetKeyDown(KeyCode.P))
             {
                 startPTime = Time.time;
+                isPeeing = true;
+                peeingBar.gameObject.SetActive(true);
                 Debug.Log("start pee" + startPTime);
+
             }
             if (Input.GetKey(KeyCode.P) && ((Time.time - startPTime) > enteredPlace.ptime))
             {
@@ -99,7 +117,11 @@ public class player : NetworkBehaviour
                 Debug.Log("pee done" + Time.time);
                 Debug.Log("NetId " + netId);
                 SetEmptyPlace();
+                isPeeing = false;
+                peeingBar.gameObject.SetActive(false);
             }
+            if (isPeeing) peeingBar.UpdatePeeingBar((Time.time - startPTime) / enteredPlace.ptime);
+
         }
         if (level >= 3 && waitingMan != emptyMan)
         {
