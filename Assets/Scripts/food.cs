@@ -2,26 +2,88 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class food : MonoBehaviour
+public enum FoodType
 {
-    public float foodValue = 10;
-    public float foodSpawnInterval = 2;
-    // Start is called before the first frame update
-    void Start()
-    {
+    None = -1, Brocconi = 0, Carrot = 1, Chicken = 2, Chocolate = 3,
+    Fries = 4, Grape = 5, Rubbish = 6, Tomato = 7, NumOfFood = 8
+}
 
+public static class FoodTypeExtensions
+{
+    public static int FoodFullValue(this FoodType me)
+    {
+        switch (me)
+        {
+            case FoodType.None:
+                return 0;
+            case FoodType.Brocconi:
+                return 1;
+            case FoodType.Carrot:
+                return 2;
+            case FoodType.Chicken:
+                return 4;
+            case FoodType.Chocolate:
+                return 1;
+            case FoodType.Fries:
+                return 1;
+            case FoodType.Grape:
+                return 2;
+            case FoodType.Rubbish:
+                return 1;
+            case FoodType.Tomato:
+                return 3;
+            default:
+                return 0;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public static int FoodHealthValue(this FoodType me)
     {
+        switch (me)
+        {
+            case FoodType.None:
+                return 0;
+            case FoodType.Brocconi:
+                return 1;
+            case FoodType.Carrot:
+                return 3;
+            case FoodType.Chicken:
+                return 4;
+            case FoodType.Chocolate:
+                return -4;
+            case FoodType.Fries:
+                return -1;
+            case FoodType.Grape:
+                return -1;
+            case FoodType.Rubbish:
+                return -2;
+            case FoodType.Tomato:
+                return 2;
+            default:
+                return 0;
+        }
+    }
+}
+public class Food : MonoBehaviour
+{
+    [SerializeField] FoodType m_foodType = FoodType.None;
+    [SerializeField] Sprite[] m_foodSprites;
+    [SerializeField] SpriteRenderer m_foodSpriteRenderer;
+    public float foodSpawnInterval = 2;
 
+    public void SetFoodType(int foodTypeIndex)
+    {
+        m_foodType = (FoodType)foodTypeIndex;
+        if (m_foodType != FoodType.None) m_foodSpriteRenderer.sprite = m_foodSprites[foodTypeIndex];
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.tag == "Player")
         {
-            other.gameObject.GetComponent<player>().AddFoodValue(foodValue);
+            player plyr = other.gameObject.GetComponent<player>();
+            plyr.AddFoodValue(m_foodType.FoodFullValue());
+            plyr.AddHealthValue(m_foodType.FoodHealthValue());
+            plyr.PlayHintAnimation(m_foodType.FoodFullValue(), m_foodType.FoodHealthValue(), 0, 0);
         }
         Destroy(gameObject);
     }

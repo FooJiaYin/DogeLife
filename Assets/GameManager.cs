@@ -7,7 +7,7 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance;
     // 以後再寫Inspector
-    public GameObject[] foods;
+    public GameObject food;
     public ManController mans;
     public GameObject PKArea;
     float[] nextFoodSwpanTimes;
@@ -21,9 +21,9 @@ public class GameManager : NetworkBehaviour
     }
 
     // [ClientRpc]
-    void SpawnFood(GameObject food, int foodSpawnerIndex)
+    void SpawnFood(GameObject food, int foodTypeIndex, int foodSpawnerIndex)
     {
-        var newFood = foodSpawners[foodSpawnerIndex].SpawnFood(food);
+        var newFood = foodSpawners[foodSpawnerIndex].SpawnFood(food, foodTypeIndex);
         // Debug.Log(newFood.transform.position);
         // NetworkClient.RegisterPrefab(newFood);
         if (newFood != null) NetworkServer.Spawn(newFood);
@@ -36,8 +36,9 @@ public class GameManager : NetworkBehaviour
     {
         Instance = this;
         getSpawners();
-        nextFoodSwpanTimes = new float[foods.Length];
-        for (int i = 0; i < foods.Length; i++)
+        int numOfFood = (int)FoodType.NumOfFood;
+        nextFoodSwpanTimes = new float[numOfFood];
+        for (int i = 0; i < numOfFood; i++)
         {
             nextFoodSwpanTimes[i] = Time.time;
             Debug.Log(nextFoodSwpanTimes[i]);
@@ -52,13 +53,13 @@ public class GameManager : NetworkBehaviour
         // Spawn only at the server
         if (!isServer) return;
 
-        for (int i = 0; i < foods.Length; i++)
+        for (int i = 0; i < (int)FoodType.NumOfFood; i++)
         {
             if (Time.time > nextFoodSwpanTimes[i])
             {
                 var foodSpawnerIndex = Random.Range(0, foodSpawners.Length);
-                SpawnFood(foods[i], foodSpawnerIndex);
-                nextFoodSwpanTimes[i] += foods[i].GetComponent<food>().foodSpawnInterval;
+                SpawnFood(food, i, foodSpawnerIndex);
+                nextFoodSwpanTimes[i] += food.GetComponent<Food>().foodSpawnInterval;
             }
         }
     }

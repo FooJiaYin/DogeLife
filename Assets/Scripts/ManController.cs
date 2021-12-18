@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ManController : MonoBehaviour
 {
-    // Start is called before the first frame update
     public int activeAction;
     public int valueGain;
     public bool active = false;
@@ -18,7 +17,6 @@ public class ManController : MonoBehaviour
         nextTime = Time.time;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Time.time > nextTime)

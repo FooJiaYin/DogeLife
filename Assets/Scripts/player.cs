@@ -8,13 +8,16 @@ using TMPro;
 
 public class player : NetworkBehaviour
 {
+    const int FOOD_MAX = 20;
+    const int HEALTH_MAX = 20;
     [SyncVar]
     public string name;
     [SyncVar(hook = nameof(updateLevel))]
     int level = 1;
     float foodValue = 10;
-    float socialValue = 0;
-    float placeValue = 0;
+    float healthValue = 20;
+    int placeValue = 0;
+    int socialValue = 0;
     [SyncVar(hook = nameof(setVictoryValue))]
     int victoryValue = 3;
     public uint netId;
@@ -36,11 +39,8 @@ public class player : NetworkBehaviour
     Vector2 movement;
     [Header("UI Score board")]
     public Text volumeValueDisplay;
-    public Text foodValueDisplay;
-    public Text placeValueDisplay;
-    public Text socialValueDisplay;
     public Text victoryValueDisplay;
-    public Text levelDisplay;
+    public PlayerScoreBoard playerScoreBoard;
     public Text nameDisplay;
 
     [Header("Player Display")]
@@ -49,10 +49,11 @@ public class player : NetworkBehaviour
     public Sprite[] sprites;
     CinemachineVirtualCamera VirtualCamera;
 
+    [SerializeField] PlayerHintBox hintBox;
+    [SerializeField] Animation hintBoxAnimation;
+
     public override void OnStartLocalPlayer()
     {
-        // Camera.main.transform.SetParent(transform);
-        // Camera.main.transform.localPosition = new Vector3(0, 0, 0);
         GameObject vcam = GameObject.FindWithTag("Virtual Camera");
         if (vcam != null) VirtualCamera = vcam.GetComponent<CinemachineVirtualCamera>();
         VirtualCamera.Follow = this.transform;
@@ -62,17 +63,14 @@ public class player : NetworkBehaviour
     {
         rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        emptyMan = GameObject.Find("Empty").GetComponent<ManController>();
+        emptyMan = GameObject.Find("EmptyManAndPlace").GetComponent<ManController>();
         waitingMan = emptyMan;
-        emptyPlace = GameObject.Find("Empty").GetComponent<PlaceController>();
+        emptyPlace = GameObject.Find("EmptyManAndPlace").GetComponent<PlaceController>();
         enteredPlace = emptyPlace;
         volume = GameObject.Find("Volume").GetComponent<Volume>();
         volumeValueDisplay = GetComponentInChildren<Text>();
-        foodValueDisplay = GameObject.Find("FoodValue").GetComponent<Text>();
-        placeValueDisplay = GameObject.Find("PlaceValue").GetComponent<Text>();
-        socialValueDisplay = GameObject.Find("SocialValue").GetComponent<Text>();
+        playerScoreBoard = GameObject.Find("UI - Score board").GetComponent<PlayerScoreBoard>();
         victoryValueDisplay = GameObject.Find("VictoryValue").GetComponent<Text>();
-        levelDisplay = GameObject.Find("LevelDisplay").GetComponent<Text>();
         nameDisplay = GameObject.Find("PlayerNameDisplay").GetComponent<Text>();
         if (peeingBar == null) peeingBar = GameObject.Find("Pee Bar").GetComponent<PeeingBar>();
 
@@ -111,14 +109,24 @@ public class player : NetworkBehaviour
                 Debug.Log("start pee" + startPTime);
 
             }
-            if (Input.GetKey(KeyCode.P) && ((Time.time - startPTime) > enteredPlace.ptime))
+            if (Input.GetKeyUp(KeyCode.P))
             {
-                enteredPlace.setOwner(this, netId);
-                Debug.Log("pee done" + Time.time);
-                Debug.Log("NetId " + netId);
-                SetEmptyPlace();
-                isPeeing = false;
-                peeingBar.gameObject.SetActive(false);
+                if (Time.time - startPTime > enteredPlace.ptime)
+                {
+                    enteredPlace.setOwner(this, netId);
+                    Debug.Log("pee done" + Time.time);
+                    Debug.Log("NetId " + netId);
+                    SetEmptyPlace();
+                    isPeeing = false;
+                    peeingBar.gameObject.SetActive(false);
+                }
+                else
+                {
+                    isPeeing = false;
+                    peeingBar.UpdatePeeingBar(0);
+                    peeingBar.gameObject.SetActive(false);
+                }
+
             }
             if (isPeeing) peeingBar.UpdatePeeingBar((Time.time - startPTime) / enteredPlace.ptime);
 
@@ -129,7 +137,9 @@ public class player : NetworkBehaviour
             {
                 if (waitingMan.active)
                 {
-                    AddSocialValue(waitingMan.actions[waitingMan.activeAction].score);
+                    int addScore = waitingMan.actions[waitingMan.activeAction].score;
+                    AddSocialValue(addScore);
+                    PlayHintAnimation(0, 0, 0, addScore);
                     waitingMan.unsetActiveAction();
                 }
                 SetEmptyMan();
@@ -153,6 +163,11 @@ public class player : NetworkBehaviour
     public void SetLocalVolume()
     {
         if (!isLocalPlayer) return;
+        if (volume == null)
+        {
+            Debug.Log("volume is gone!");
+            return;
+        }
         CmdSetVolume(volume.volume);
     }
 
@@ -184,40 +199,53 @@ public class player : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
         foodValue += value;
-        foodValueDisplay.text = this.foodValue + " ";
+        if (foodValue > FOOD_MAX) foodValue = FOOD_MAX;
+        playerScoreBoard.FoodValue = foodValue;
         if (foodValue >= 20 && level == 1)
         {
             SetLevel(2);
         }
-        else if (foodValue < 20 && level > 1)
+        else if (foodValue < 10 && level > 1)
         {
             SetLevel(1);
         }
     }
-    public void AddPlaceValue(float value)
+
+    public void AddHealthValue(float value)
+    {
+        if (!isLocalPlayer) return;
+        healthValue += value;
+        if (healthValue > HEALTH_MAX) healthValue = HEALTH_MAX;
+        playerScoreBoard.HealthValue = healthValue;
+        if (healthValue <= 0)
+        {
+            Debug.Log("Game Over");
+        }
+    }
+    public void AddPlaceValue(int value)
     {
         if (!isLocalPlayer) return;
         placeValue += value;
-        placeValueDisplay.text = placeValue + " ";
-        if (placeValue >= 20 && level == 2)
+        playerScoreBoard.PlaceValue = placeValue;
+        if (placeValue >= 5 && level == 2)
         {
             SetLevel(3);
         }
-        else if (placeValue < 20 && level > 2)
+        else if (placeValue < 5 && level > 2)
         {
             SetLevel(2);
         }
     }
-    public void AddSocialValue(float value)
+    public void AddSocialValue(int value)
     {
         if (!isLocalPlayer) return;
         socialValue += value;
-        socialValueDisplay.text = socialValue + " ";
-        if (socialValue >= 20 && level == 3)
+        playerScoreBoard.SocialValue = socialValue;
+        if (socialValue >= 5 && level == 3)
         {
             SetLevel(4);
         }
-        else if (socialValue < 20 && level > 3)
+        else if (socialValue == 0 && level > 3)
         {
             SetLevel(3);
         }
@@ -274,38 +302,40 @@ public class player : NetworkBehaviour
         if (level < 3)
         {
             socialValue = 0;
-            socialValueDisplay.text = "-";
+            playerScoreBoard.SocialValue = socialValue;
         }
         if (level < 2)
         {
             placeValue = 0;
-            placeValueDisplay.text = "-";
+            playerScoreBoard.PlaceValue = placeValue;
         }
+
+        playerScoreBoard.Level = newLevel;
         switch (newLevel)
         {
             case 1:
-                levelDisplay.text = "1 溫飽狗狗";
                 spriteRenderer.sprite = sprites[0];
                 break;
             case 2:
-                levelDisplay.text = "2 安全狗狗";
-                placeValueDisplay.text = "0";
                 spriteRenderer.sprite = sprites[1];
                 break;
             case 3:
-                levelDisplay.text = "3 人氣狗狗";
-                socialValueDisplay.text = "0";
+                // socialValueDisplay.text = "0";
                 spriteRenderer.sprite = sprites[2];
                 break;
             case 4:
-                levelDisplay.text = "4 老大狗狗";
                 victoryValueDisplay.text = "3";
                 spriteRenderer.sprite = sprites[3];
                 break;
             case 5:
-                levelDisplay.text = "5 上帝狗狗";
                 spriteRenderer.sprite = sprites[4];
                 break;
         }
+    }
+
+    public void PlayHintAnimation(int eatValue, int healthValue, int placeValue, int socialValue)
+    {
+        hintBox.UpdateValue(eatValue, healthValue, placeValue, socialValue);
+        hintBoxAnimation.Play();
     }
 }

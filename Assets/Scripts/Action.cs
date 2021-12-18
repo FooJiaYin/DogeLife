@@ -5,7 +5,7 @@ using UnityEngine;
 public class Action : MonoBehaviour
 {
     public KeyCode input;
-    public float score;
+    public int score;
     Renderer renderer;
     private void Start()
     {

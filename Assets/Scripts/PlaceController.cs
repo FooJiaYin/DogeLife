@@ -6,8 +6,8 @@ using Mirror;
 // [RequireComponent(typeof(Rigidbody2D))]
 public class PlaceController : NetworkBehaviour
 {
-    public float ownerValue = 10;
-    public player owner;
+    public int ownerValue = 1;
+    public player owner = null;
     [SyncVar(hook = nameof(updateOwner))]
     public uint ownerId;
     public float ptime = 5;
@@ -16,7 +16,7 @@ public class PlaceController : NetworkBehaviour
     void Start()
     {
         renderer = GetComponent<Renderer>();
-        if(ownerId != 0) updateOwner(0, ownerId);
+        if (ownerId != 0) updateOwner(0, ownerId);
     }
 
     // Update is called once per frame
@@ -47,14 +47,19 @@ public class PlaceController : NetworkBehaviour
         // owner = NetworkServer.spawned[newOwnerId].gameObject.GetComponent<player>();
         // owner.AddPlaceValue(ownerValue);
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        for (int i = 0; i < players.Length; i++) {
-            if (players[i].GetComponent<NetworkIdentity>().netId == oldOwnerId) {
+        for (int i = 0; i < players.Length; i++)
+        {
+            /*
+            if (players[i].GetComponent<NetworkIdentity>().netId == oldOwnerId)
+            {
                 player oldOwner = players[i].GetComponent<player>();
-                owner.AddPlaceValue(ownerValue);
+                oldOwner.AddPlaceValue(-ownerValue);
             }
-            if(players[i].GetComponent<NetworkIdentity>().netId == newOwnerId) {
+            */
+            if (players[i].GetComponent<NetworkIdentity>().netId == newOwnerId)
+            {
                 owner = players[i].GetComponent<player>();
-                owner.AddPlaceValue(ownerValue);
+                //owner.AddPlaceValue(ownerValue);
             }
         }
         renderer.material.color = owner.placeColor;
@@ -71,6 +76,7 @@ public class PlaceController : NetworkBehaviour
             owner = newOwner;
             renderer.material.color = owner.placeColor;
             owner.AddPlaceValue(ownerValue);
+            owner.PlayHintAnimation(0, 0, ownerValue, 0);
             ownerId = newOwnerId;
             CmdSetOwner(newOwnerId);
         }

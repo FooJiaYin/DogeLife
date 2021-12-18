@@ -19,7 +19,7 @@ public class PKController : NetworkBehaviour
     bool active = false;
     public List<player> players;
     float[] totalVolume;
- 
+
     void Start()
     {
         rankingDisplay = GameObject.Find("RankingDisplay").GetComponent<Text>();
@@ -31,28 +31,30 @@ public class PKController : NetworkBehaviour
     void Update()
     {
         if (!isServer) return;
-        if(active) {
-            if (Time.time > startTime + duration) {
+        if (active)
+        {
+            if (Time.time > startTime + duration)
+            {
                 active = false;
                 wall.SetActive(false);
                 RpcSetRank("Not started");
                 startTime = Time.time + interval;
-                if(players.Count <= 1) return;
+                if (players.Count <= 1) return;
                 for (int i = 0; i < players.Count; i++)
                 {
-                    if (i < players.Count/5)
+                    if (i < players.Count / 5)
                     {
                         players[i].AddVictoryValue(-2);
                     }
-                    else if (i < players.Count*2/5)
+                    else if (i < players.Count * 2 / 5)
                     {
                         players[i].AddVictoryValue(-1);
                     }
-                    else if (i < players.Count*3/5)
+                    else if (i < players.Count * 3 / 5)
                     {
                         players[i].AddVictoryValue(0);
                     }
-                    else if (i < players.Count*4/5)
+                    else if (i < players.Count * 4 / 5)
                     {
                         players[i].AddVictoryValue(1);
                     }
@@ -61,14 +63,20 @@ public class PKController : NetworkBehaviour
                         players[i].AddVictoryValue(2);
                     }
                 }
-            } else {
-                if (Time.time > nextDetectTime) {
+            }
+            else
+            {
+                if (Time.time > nextDetectTime)
+                {
                     nextDetectTime = Time.time + sensitivity;
                     GetRank();
                 }
             }
-        } else {
-            if (Time.time > startTime) {
+        }
+        else
+        {
+            if (Time.time > startTime)
+            {
                 active = true;
                 wall.SetActive(true);
                 startTime = Time.time;
