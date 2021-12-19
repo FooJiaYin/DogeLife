@@ -91,7 +91,7 @@ public class PlayerScoreBoard : MonoBehaviour
         {
             foodBarColor.color = Color.red;
         }
-        else if (foodValue >= 10 && foodValue < 12)
+        else if (foodValue < 12)
         {
             foodBarColor.color = Color.magenta;
         }
