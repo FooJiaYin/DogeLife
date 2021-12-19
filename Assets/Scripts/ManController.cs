@@ -69,6 +69,20 @@ public class ManController : MonoBehaviour
         if (active && other.tag == "Player")
         {
             other.GetComponent<player>().SetEmptyMan();
+
         }
+        if (other.gameObject.tag == "Player")
+        {
+            this.gameObject.transform.localScale = Vector3.one * 0.5f;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            this.gameObject.transform.localScale = Vector3.one * 0.55f;
+        }
+
     }
 }

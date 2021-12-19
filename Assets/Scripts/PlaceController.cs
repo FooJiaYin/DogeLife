@@ -87,6 +87,7 @@ public class PlaceController : NetworkBehaviour
         {
             other.GetComponent<player>().enteredPlace = this;
             Debug.Log("place set!");
+            this.gameObject.transform.localScale = Vector3.one;
         }
     }
     private void OnTriggerExit2D(Collider2D other)
@@ -95,6 +96,8 @@ public class PlaceController : NetworkBehaviour
         {
             other.GetComponent<player>().SetEmptyPlace();
             Debug.Log("place unset!");
+            this.gameObject.transform.localScale = Vector3.one * 0.7f;
+
         }
     }
 }

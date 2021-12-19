@@ -12,6 +12,7 @@ public class PlayerScoreBoard : MonoBehaviour
 
     [SerializeField] Image picture;
     [SerializeField] Sprite[] sprites;
+    [SerializeField] Text PlayerNameDisplay;
     [SerializeField] Text foodValueDisplay;
     [SerializeField] Text healthValueDisplay;
     [SerializeField] Text levelValueDisplay;
@@ -20,6 +21,9 @@ public class PlayerScoreBoard : MonoBehaviour
 
     [SerializeField] RectTransform foodBarDisplay;
     [SerializeField] RectTransform healthBarDisplay;
+
+    [SerializeField] Image foodBarColor;
+    [SerializeField] Image healthBarColor;
 
     float foodValue = 10;
     public float FoodValue
@@ -75,17 +79,40 @@ public class PlayerScoreBoard : MonoBehaviour
         }
     }
 
+    public void SetPlayerName(string name)
+    {
+        PlayerNameDisplay.text = name;
+    }
     void SetFoodValue()
     {
         foodValueDisplay.text = foodValue + " / " + HealthValueMax;
         foodBarDisplay.sizeDelta = new Vector2(BarMaxWidth * foodValue / FoodValueMax, BarMaxHeight);
+        if (foodValue < 3)
+        {
+            foodBarColor.color = Color.red;
+        }
+        else if (foodValue >= 10 && foodValue < 12)
+        {
+            foodBarColor.color = Color.magenta;
+        }
+        else
+        {
+            foodBarColor.color = Color.black;
+        }
     }
 
     void SetHealthValue()
     {
         healthValueDisplay.text = healthValue + " / " + HealthValueMax;
         healthBarDisplay.sizeDelta = new Vector2(BarMaxWidth * healthValue / HealthValueMax, BarMaxHeight);
-
+        if (healthValue < 3)
+        {
+            healthBarColor.color = Color.red;
+        }
+        else
+        {
+            healthBarColor.color = Color.black;
+        }
     }
 
     void SetLevelValue()
@@ -93,4 +120,5 @@ public class PlayerScoreBoard : MonoBehaviour
         picture.sprite = sprites[level - 1];
         levelValueDisplay.text = "LV " + level;
     }
+
 }

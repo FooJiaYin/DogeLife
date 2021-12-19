@@ -20,93 +20,104 @@ public class Volume : MonoBehaviour
 
     private void Awake()
     {
-        m_AudioSource = GetComponent<AudioSource>();
+        //m_AudioSource = GetComponent<AudioSource>();
         device = Microphone.devices; // get device name
 
         // To warn if have no microphone detected
-        if (device.Length == 0) { Debug.LogWarning ("No microphone input."); }
+        if (device.Length == 0) { Debug.LogWarning("No microphone input."); }
         StartCaptureVoice();
     }
 
-    private void Update () {
+    private void Update()
+    {
         // float volume = Volume;
         // Debug.Log("Microphone Volume: " + volume.ToString());
         // Debug.Log("Microphone Frequency: " + pitch.pitchVal.ToString());
         // Debug.Log("Microphone Frequency: " + test().ToString());
     }
 
-    private void OnDestroy () {
-        StopCaptureVoice ();
+    private void OnDestroy()
+    {
+        StopCaptureVoice();
     }
 
-    public float frequency {
+    public float frequency
+    {
         get { return m_AudioSource.clip.frequency; }
         // set { m_Frequency = value; }
     }
 
-    public float volume {
-        get {
+    public float volume
+    {
+        get
+        {
             // if (Microphone.isRecording (device[devicePos])) {
-                // 取得的樣本數量
-                int sampleSize = 128;
-                float[] samples = new float[sampleSize];
-                int startPosition = Microphone.GetPosition (device[devicePos]) - (sampleSize + 1);
-                // 得到資料
-                this.m_AudioSource.clip.GetData (samples, startPosition);
-                microphoneSamles = samples;
+            // 取得的樣本數量
+            int sampleSize = 128;
+            float[] samples = new float[sampleSize];
+            int startPosition = Microphone.GetPosition(device[devicePos]) - (sampleSize + 1);
+            // 得到資料
+            this.m_AudioSource.clip.GetData(samples, startPosition);
+            microphoneSamles = samples;
 
-                // Getting a peak on the last 128 samples
-                float levelMax = 0;
-                for (int i = 0; i < sampleSize; i++) {
-                    float wavePeek = samples[i];
-                    if (levelMax < wavePeek) {
-                        levelMax = wavePeek;
-                    }
+            // Getting a peak on the last 128 samples
+            float levelMax = 0;
+            for (int i = 0; i < sampleSize; i++)
+            {
+                float wavePeek = samples[i];
+                if (levelMax < wavePeek)
+                {
+                    levelMax = wavePeek;
                 }
-                return levelMax * 99;
+            }
+            return levelMax * 99;
             // }
             // return 0;
         }
 
     }
 
-    public float test() {
+    public float test()
+    {
         int amountSamples = 128;
-            float Threshold = 0.02f;
-            float[] dataSpectrum = new float[amountSamples];
-            m_AudioSource.GetSpectrumData(dataSpectrum, 0, FFTWindow.BlackmanHarris); //Rectangular
-            float maxV = 0;
-            var maxN = 0;
-            for (int i = 0; i < amountSamples; i++) {
-                if (!(dataSpectrum[i] > maxV) || !(dataSpectrum[i] > Threshold)) {
-                    continue;
-                }
+        float Threshold = 0.02f;
+        float[] dataSpectrum = new float[amountSamples];
+        m_AudioSource.GetSpectrumData(dataSpectrum, 0, FFTWindow.BlackmanHarris); //Rectangular
+        float maxV = 0;
+        var maxN = 0;
+        for (int i = 0; i < amountSamples; i++)
+        {
+            if (!(dataSpectrum[i] > maxV) || !(dataSpectrum[i] > Threshold))
+            {
+                continue;
+            }
             Debug.Log("dataSpectrum: " + dataSpectrum[i].ToString());
 
-                maxV = dataSpectrum[i];
-                maxN = i; // maxN is the index of max
-            }
-
-            float freqN = maxN; // pass the index to a float variable
-            Debug.Log("maxN: " + maxN.ToString());
-            if (maxN > 0 && maxN < amountSamples - 1) { // interpolate index using neighbours
-                var dL = dataSpectrum[maxN - 1] / dataSpectrum[maxN];
-                var dR = dataSpectrum[maxN + 1] / dataSpectrum[maxN];
-                freqN += 0.5f * (dR * dR - dL * dL);
-                Debug.Log("freqN: " + freqN.ToString());
-            }
-
-            return freqN * (AudioSettings.outputSampleRate / 2) / amountSamples; // convert index to frequency
+            maxV = dataSpectrum[i];
+            maxN = i; // maxN is the index of max
         }
+
+        float freqN = maxN; // pass the index to a float variable
+        Debug.Log("maxN: " + maxN.ToString());
+        if (maxN > 0 && maxN < amountSamples - 1)
+        { // interpolate index using neighbours
+            var dL = dataSpectrum[maxN - 1] / dataSpectrum[maxN];
+            var dR = dataSpectrum[maxN + 1] / dataSpectrum[maxN];
+            freqN += 0.5f * (dR * dR - dL * dL);
+            Debug.Log("freqN: " + freqN.ToString());
+        }
+
+        return freqN * (AudioSettings.outputSampleRate / 2) / amountSamples; // convert index to frequency
+    }
 
     public void StartCaptureVoice()
     {
         // get microphone frequency
-        Microphone.GetDeviceCaps (device[devicePos], out minFreq, out maxFreq);
+        Microphone.GetDeviceCaps(device[devicePos], out minFreq, out maxFreq);
         // set audio source
-        m_AudioSource.clip = Microphone.Start (device[devicePos], true, 3599, maxFreq);
+        m_AudioSource.clip = Microphone.Start(device[devicePos], true, 3599, maxFreq);
         m_AudioSource.loop = true;
-        m_AudioSource.timeSamples = Microphone.GetPosition (device[devicePos]);
+        m_AudioSource.timeSamples = Microphone.GetPosition(device[devicePos]);
         m_AudioSource.Play();
     }
 

@@ -41,7 +41,7 @@ public class GameManager : NetworkBehaviour
         for (int i = 0; i < numOfFood; i++)
         {
             nextFoodSwpanTimes[i] = Time.time;
-            Debug.Log(nextFoodSwpanTimes[i]);
+            //Debug.Log(nextFoodSwpanTimes[i]);
         }
         if (isServer) NetworkServer.Spawn(PKArea);
     }

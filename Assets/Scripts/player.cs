@@ -10,16 +10,17 @@ public class player : NetworkBehaviour
 {
     const int FOOD_MAX = 20;
     const int HEALTH_MAX = 20;
+    const int FOOD_DECREASE_TIME = 10; // every 10 seconds -1
+    float timePassed = 0f;
     [SyncVar]
     public string name;
     [SyncVar(hook = nameof(updateLevel))]
     int level = 1;
+    public int Level { get { return level; } }
     float foodValue = 10;
     float healthValue = 20;
     int placeValue = 0;
     int socialValue = 0;
-    [SyncVar(hook = nameof(setVictoryValue))]
-    int victoryValue = 3;
     public uint netId;
 
     [SyncVar]
@@ -38,13 +39,13 @@ public class player : NetworkBehaviour
     Rigidbody2D rigidbody2D;
     Vector2 movement;
     [Header("UI Score board")]
-    public Text volumeValueDisplay;
-    public Text victoryValueDisplay;
     public PlayerScoreBoard playerScoreBoard;
-    public Text nameDisplay;
 
     [Header("Player Display")]
     public TextMeshPro playerNameText;
+    [SerializeField] GameObject volumeDisplay;
+    [SerializeField] TMP_Text volumeValueDisplay;
+
     public SpriteRenderer spriteRenderer;
     public Sprite[] sprites;
     CinemachineVirtualCamera VirtualCamera;
@@ -64,15 +65,11 @@ public class player : NetworkBehaviour
         rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         emptyMan = GameObject.Find("EmptyManAndPlace").GetComponent<ManController>();
-        waitingMan = emptyMan;
         emptyPlace = GameObject.Find("EmptyManAndPlace").GetComponent<PlaceController>();
+        waitingMan = emptyMan;
         enteredPlace = emptyPlace;
         volume = GameObject.Find("Volume").GetComponent<Volume>();
-        volumeValueDisplay = GetComponentInChildren<Text>();
         playerScoreBoard = GameObject.Find("UI - Score board").GetComponent<PlayerScoreBoard>();
-        victoryValueDisplay = GameObject.Find("VictoryValue").GetComponent<Text>();
-        nameDisplay = GameObject.Find("PlayerNameDisplay").GetComponent<Text>();
-        if (peeingBar == null) peeingBar = GameObject.Find("Pee Bar").GetComponent<PeeingBar>();
 
         Color[] colors = { Color.yellow, Color.green, Color.blue, Color.red, Color.cyan, Color.magenta };
         if (isLocalPlayer)
@@ -92,7 +89,7 @@ public class player : NetworkBehaviour
         if (name == "") name = names[Random.Range(0, names.Length)];
         CmdSetName(name);
         playerNameText.text = name;
-        nameDisplay.text = name;
+        playerScoreBoard.SetPlayerName(name);
     }
 
     void Update()
@@ -146,6 +143,12 @@ public class player : NetworkBehaviour
             }
         }
         SetLocalVolume();
+        timePassed += Time.deltaTime;
+        if (timePassed > FOOD_DECREASE_TIME)
+        {
+            timePassed = 0;
+            AddFoodValue(-1);
+        }
     }
     private void FixedUpdate()
     {
@@ -163,11 +166,6 @@ public class player : NetworkBehaviour
     public void SetLocalVolume()
     {
         if (!isLocalPlayer) return;
-        if (volume == null)
-        {
-            Debug.Log("volume is gone!");
-            return;
-        }
         CmdSetVolume(volume.volume);
     }
 
@@ -192,7 +190,7 @@ public class player : NetworkBehaviour
 
     public void ChangeVolumeValue(float value)
     {
-        volumeValueDisplay.text = value + "";
+        volumeValueDisplay.text = value.ToString("f2");
     }
 
     public void AddFoodValue(float value)
@@ -250,33 +248,6 @@ public class player : NetworkBehaviour
             SetLevel(3);
         }
     }
-    public void AddVictoryValue(int value)
-    {
-        // if (!isLocalPlayer) return;
-        victoryValue += value;
-        victoryValueDisplay.text = victoryValue + " ";
-        if (victoryValue >= 6)
-        {
-            SetLevel(5);
-        }
-        if (victoryValue == 0 && level > 3)
-        {
-            SetLevel(3);
-        }
-    }
-    void setVictoryValue(int oldValue, int newValue)
-    {
-        if (!isLocalPlayer) return;
-        victoryValueDisplay.text = newValue + " ";
-        if (newValue >= 6)
-        {
-            SetLevel(5);
-        }
-        if (newValue == 0 && level > 3)
-        {
-            SetLevel(3);
-        }
-    }
     public void SetLevel(int value)
     {
         if (!isLocalPlayer) return;
@@ -296,8 +267,6 @@ public class player : NetworkBehaviour
     {
         if (level < 4)
         {
-            victoryValue = 3;
-            victoryValueDisplay.text = "-";
         }
         if (level < 3)
         {
@@ -311,31 +280,14 @@ public class player : NetworkBehaviour
         }
 
         playerScoreBoard.Level = newLevel;
-        switch (newLevel)
-        {
-            case 1:
-                spriteRenderer.sprite = sprites[0];
-                break;
-            case 2:
-                spriteRenderer.sprite = sprites[1];
-                break;
-            case 3:
-                // socialValueDisplay.text = "0";
-                spriteRenderer.sprite = sprites[2];
-                break;
-            case 4:
-                victoryValueDisplay.text = "3";
-                spriteRenderer.sprite = sprites[3];
-                break;
-            case 5:
-                spriteRenderer.sprite = sprites[4];
-                break;
-        }
+        spriteRenderer.sprite = sprites[newLevel - 1];
+        volumeDisplay.gameObject.SetActive(newLevel == 4);
     }
 
     public void PlayHintAnimation(int eatValue, int healthValue, int placeValue, int socialValue)
     {
         hintBox.UpdateValue(eatValue, healthValue, placeValue, socialValue);
+        if (hintBoxAnimation.IsPlaying("HintBoxAnimation")) hintBoxAnimation.Stop();
         hintBoxAnimation.Play();
     }
 }

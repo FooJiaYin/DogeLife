@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using TMPro;
 
 public class PKController : NetworkBehaviour
 {
-    // Start is called before the first frame update
-    Text rankingDisplay;
+    [SerializeField] PKRankingBoard rankingDisplay;
+    [SerializeField] TMP_Text statusText;
     public GameObject wall;
     public float interval;
     public float duration;
@@ -22,12 +23,10 @@ public class PKController : NetworkBehaviour
 
     void Start()
     {
-        rankingDisplay = GameObject.Find("RankingDisplay").GetComponent<Text>();
         wall.SetActive(false);
-        RpcSetRank("Not started");
+        //RpcSetRank("Wait to start");
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!isServer) return;
@@ -36,31 +35,27 @@ public class PKController : NetworkBehaviour
             if (Time.time > startTime + duration)
             {
                 active = false;
+                statusText.text = "preparing...";
                 wall.SetActive(false);
-                RpcSetRank("Not started");
                 startTime = Time.time + interval;
-                if (players.Count <= 1) return;
-                for (int i = 0; i < players.Count; i++)
+                if (players.Count == 0) return;
+                if (players.Count == 1)
                 {
-                    if (i < players.Count / 5)
+                    if (totalVolume[0] > 10)
                     {
-                        players[i].AddVictoryValue(-2);
-                    }
-                    else if (i < players.Count * 2 / 5)
-                    {
-                        players[i].AddVictoryValue(-1);
-                    }
-                    else if (i < players.Count * 3 / 5)
-                    {
-                        players[i].AddVictoryValue(0);
-                    }
-                    else if (i < players.Count * 4 / 5)
-                    {
-                        players[i].AddVictoryValue(1);
+                        players[0].SetLevel(5);
                     }
                     else
                     {
-                        players[i].AddVictoryValue(2);
+                        players[0].AddSocialValue(-1);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < players.Count; i++)
+                    {
+                        if (i == 0) players[i].SetLevel(5);
+                        else players[i].AddSocialValue(-1);
                     }
                 }
             }
@@ -69,19 +64,26 @@ public class PKController : NetworkBehaviour
                 if (Time.time > nextDetectTime)
                 {
                     nextDetectTime = Time.time + sensitivity;
+
                     GetRank();
                 }
             }
+            statusText.text = "playing " + (duration - Time.time + startTime).ToString("f2");
         }
         else
         {
             if (Time.time > startTime)
             {
                 active = true;
+                statusText.text = "playing " + (duration - Time.time + startTime).ToString("f2");
                 wall.SetActive(true);
                 startTime = Time.time;
                 totalVolume = new float[players.Count];
                 nextDetectTime = Time.time + sensitivity;
+            }
+            else
+            {
+                statusText.text = "preparing " + (startTime - Time.time).ToString("f2");
             }
         }
     }
@@ -95,7 +97,6 @@ public class PKController : NetworkBehaviour
         else
         {
             wall.SetActive(false);
-            RpcSetRank("Not started");
         }
     }
 
@@ -108,17 +109,15 @@ public class PKController : NetworkBehaviour
         {
             totalVolume[i] += players[i].volumeValue;
             rankingText += "" + players[i].name + ": " + totalVolume[i].ToString("0.0") + " ";
-            // Debug.Log(rankingDisplay.text);
+
         }
-        // Debug.Log(rankingText);
-        RpcSetRank(rankingText);
+        if (players.Count > 0) RpcSetRank(rankingText);
     }
 
     [ClientRpc]
     public void RpcSetRank(string rankingText)
     {
-        rankingDisplay = GameObject.Find("RankingDisplay").GetComponent<Text>();
-        rankingDisplay.text = rankingText;
+        rankingDisplay.rankDisplay.text = rankingText;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -126,15 +125,10 @@ public class PKController : NetworkBehaviour
         if (!isServer) return;
         if (other.gameObject.tag == "Player")
         {
-            players.Add(other.gameObject.GetComponent<player>());
-        }
-    }
-
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        if (other.tag == "Player")
-        {
-            player otherplayer = other.GetComponent<player>();
+            player p = other.gameObject.GetComponent<player>();
+            if (p.Level < 4) return;
+            players.Add(p);
+            rankingDisplay.gameObject.SetActive(true);
         }
     }
 
@@ -144,6 +138,7 @@ public class PKController : NetworkBehaviour
         if (other.tag == "Player")
         {
             players.Remove(other.GetComponent<player>());
+            rankingDisplay.gameObject.SetActive(false);
         }
     }
 }
