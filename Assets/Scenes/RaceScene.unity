@@ -1351,7 +1351,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidbody2D: {fileID: 1017655793}
-  movement: {x: 20, y: 0}
+  movement: {x: 3, y: 0}
   curr_movement: {x: 0, y: 0}
 --- !u!50 &1017655793
 Rigidbody2D:

@@ -37,6 +37,11 @@ public class RaceGameManager : MonoBehaviour
         CheckGameState();
     }
 
+    public void Win()
+    {
+        RaceUIManager.Instance.Win();
+    }
+
     void CheckGameState()
     {
         if (lives <= 0)

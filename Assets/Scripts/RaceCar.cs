@@ -30,7 +30,7 @@ public class RaceCar : MonoBehaviour
         if (player.Position.y >= Position.y)
         {
             Debug.Log("Win");
-            RaceUIManager.Instance.Win();
+            RaceGameManager.Instance.Win();
         }
     }
 

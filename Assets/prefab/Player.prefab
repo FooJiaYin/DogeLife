@@ -2222,6 +2222,8 @@ MonoBehaviour:
   peeingBar: {fileID: 4015490835873473698}
   movespeed: 5
   playerScoreBoard: {fileID: 0}
+  playerTaskBoard: {fileID: 0}
+  levelHintBoard: {fileID: 0}
   playerNameText: {fileID: 4071732470559734749}
   volumeDisplay: {fileID: 7662373833333442814}
   volumeValueDisplay: {fileID: 3479479419529309200}

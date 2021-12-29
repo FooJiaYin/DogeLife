@@ -211,6 +211,11 @@ public class player : NetworkBehaviour
         {
             SetLevel(1);
         }
+        else if (foodValue <= 0)
+        {
+            Debug.Log("Game Over");
+            //TODO: Game Over
+        }
     }
 
     public void AddHealthValue(float value)
@@ -222,6 +227,7 @@ public class player : NetworkBehaviour
         if (healthValue <= 0)
         {
             Debug.Log("Game Over");
+            //TODO: Game Over
         }
     }
     public void AddPlaceValue(int value)
