@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class RaceEndLine : MonoBehaviour
 {
+    [SerializeField] RaceGameManager gameManager;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,13 +22,9 @@ public class RaceEndLine : MonoBehaviour
         if (other.tag == "Car")
         {
             RaceCar car = other.gameObject.GetComponent<RaceCar>();
-            car.movement = Vector2.zero;
-        }
-        else if (other.tag == "Player")
-        {
-            Time.timeScale = 0;
-            Debug.Log("stop");
-        }
+            car.curr_movement = Vector2.zero;
+            RaceGameManager.Instance.Lose();
 
+        }
     }
 }

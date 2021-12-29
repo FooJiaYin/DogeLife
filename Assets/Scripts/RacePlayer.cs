@@ -16,19 +16,20 @@ public class RacePlayer : MonoBehaviour
     [SerializeField] Rigidbody2D rigidbody2D;
 
     public Vector2 Position { get { return rigidbody2D.position; } }
+    Vector2 startPos;
 
-    // Start is called before the first frame update
     void Start()
     {
+        startPos.x = rigidbody2D.position.x;
+        startPos.y = rigidbody2D.position.y;
+        Debug.Log("player" + startPos);
 
     }
-
-    // Update is called once per frame
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) Jump();
-        if (Input.GetKeyDown(KeyCode.K)) UpdateRunStatus(runStatus.keyK);
-        if (Input.GetKeyDown(KeyCode.L)) UpdateRunStatus(runStatus.keyL);
+        else if (Input.GetKeyDown(KeyCode.K)) UpdateRunStatus(runStatus.keyK);
+        else if (Input.GetKeyDown(KeyCode.L)) UpdateRunStatus(runStatus.keyL);
 
     }
 
@@ -36,8 +37,6 @@ public class RacePlayer : MonoBehaviour
     {
         if (newStatus != status) movement += new Vector2(8f, 0);
         status = newStatus;
-
-
     }
 
     private void FixedUpdate()
@@ -55,5 +54,10 @@ public class RacePlayer : MonoBehaviour
     {
         movement += new Vector2(3f, 15f);
         if (movement.y > 15) movement.y = 15f;
+    }
+
+    public void Reset()
+    {
+        rigidbody2D.position = startPos;
     }
 }

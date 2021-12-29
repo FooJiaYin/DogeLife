@@ -40,6 +40,8 @@ public class player : NetworkBehaviour
     Vector2 movement;
     [Header("UI Score board")]
     public PlayerScoreBoard playerScoreBoard;
+    public TaskBoard playerTaskBoard;
+    public LevelHintBoard levelHintBoard;
 
     [Header("Player Display")]
     public TextMeshPro playerNameText;
@@ -70,6 +72,8 @@ public class player : NetworkBehaviour
         enteredPlace = emptyPlace;
         volume = GameObject.Find("Volume").GetComponent<Volume>();
         playerScoreBoard = GameObject.Find("UI - Score board").GetComponent<PlayerScoreBoard>();
+        playerTaskBoard = GameObject.Find("UI - Tasks board").GetComponent<TaskBoard>();
+        levelHintBoard = GameObject.Find("UI - Level Hint").GetComponent<LevelHintBoard>();
 
         Color[] colors = { Color.yellow, Color.green, Color.blue, Color.red, Color.cyan, Color.magenta };
         if (isLocalPlayer)
@@ -280,8 +284,11 @@ public class player : NetworkBehaviour
         }
 
         playerScoreBoard.Level = newLevel;
+        playerTaskBoard.SetTaskWithLevel(newLevel);
         spriteRenderer.sprite = sprites[newLevel - 1];
         volumeDisplay.gameObject.SetActive(newLevel == 4);
+        if (newLevel >= oldLevel) levelHintBoard.ShowHintBoard(newLevel, 1);
+        else levelHintBoard.ShowHintBoard(newLevel, -1);
     }
 
     public void PlayHintAnimation(int eatValue, int healthValue, int placeValue, int socialValue)
