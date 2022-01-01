@@ -6,7 +6,7 @@ public class RacePlayer : MonoBehaviour
 {
     public enum runStatus
     {
-        keyK, keyL, Empty
+        keyR, keyN, Empty
     }
 
     int lives = 3;
@@ -16,21 +16,14 @@ public class RacePlayer : MonoBehaviour
     [SerializeField] Rigidbody2D rigidbody2D;
 
     public Vector2 Position { get { return rigidbody2D.position; } }
-    Vector2 startPos;
+    public Vector2 startPos;
+    [SerializeField] Animator playerAnimator;
 
-    void Start()
-    {
-        startPos.x = rigidbody2D.position.x;
-        startPos.y = rigidbody2D.position.y;
-        Debug.Log("player" + startPos);
-
-    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) Jump();
-        else if (Input.GetKeyDown(KeyCode.K)) UpdateRunStatus(runStatus.keyK);
-        else if (Input.GetKeyDown(KeyCode.L)) UpdateRunStatus(runStatus.keyL);
-
+        else if (Input.GetKeyDown(KeyCode.R)) UpdateRunStatus(runStatus.keyR);
+        else if (Input.GetKeyDown(KeyCode.N)) UpdateRunStatus(runStatus.keyN);
     }
 
     void UpdateRunStatus(runStatus newStatus)
@@ -41,13 +34,21 @@ public class RacePlayer : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (movement != Vector2.zero)
+        {
+            playerAnimator.SetBool("Walking", true);
+        }
+        else
+        {
+            playerAnimator.SetBool("Walking", false);
+
+        }
         Vector2 newPos = rigidbody2D.position + movement * Time.fixedDeltaTime;
-        if (newPos.y > 1.5) newPos.y = 1.5f;
+        if (newPos.y > startPos.y + 1.5f) newPos.y = startPos.y + 1.5f;
         rigidbody2D.MovePosition(newPos);
         movement -= new Vector2(2f, 1f);
         if (movement.x < 0) movement.x = 0;
         if (movement.y < 0) movement.y = 0;
-
     }
 
     private void Jump()
@@ -56,8 +57,9 @@ public class RacePlayer : MonoBehaviour
         if (movement.y > 15) movement.y = 15f;
     }
 
-    public void Reset()
+    public void ResetPosition()
     {
         rigidbody2D.position = startPos;
+        Debug.Log("Reset player" + startPos);
     }
 }

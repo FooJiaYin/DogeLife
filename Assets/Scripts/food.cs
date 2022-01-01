@@ -84,6 +84,7 @@ public class Food : MonoBehaviour
             plyr.AddFoodValue(m_foodType.FoodFullValue());
             plyr.AddHealthValue(m_foodType.FoodHealthValue());
             plyr.PlayHintAnimation(m_foodType.FoodFullValue(), m_foodType.FoodHealthValue(), 0, 0);
+            SoundManager.Instance.PlayFoodEatenSoundEffect();
         }
         Destroy(gameObject);
     }

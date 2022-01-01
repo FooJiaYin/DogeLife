@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class RaceUIManager : MonoBehaviour
 {
@@ -23,46 +25,85 @@ public class RaceUIManager : MonoBehaviour
     [SerializeField] GameObject WinContent;
     [SerializeField] GameObject GameOverContent;
     [SerializeField] GameObject TryAgainContent;
-
+    public RacePlayer player;
+    public RaceCar car;
+    public RaceScene raceScene;
 
     void Awake()
     {
         _instance = this;
-        Time.timeScale = 0;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            StartContent.SetActive(false);
-            WinContent.SetActive(false);
-            GameOverContent.SetActive(false);
-            TryAgainContent.SetActive(false);
-            MainPanel.SetActive(false);
+            if (StartContent.activeSelf)
+            {
+                StartContent.SetActive(false);
+                MainPanel.SetActive(false);
+                car.StartCarDriving();
+            }
+            if (WinContent.activeSelf)
+            {
+                // player.ResetPosition();
+                // car.ResetPosition();
+                WinContent.SetActive(false);
+                StartContent.SetActive(true);
+                raceScene.CloseScene();
+            }
+            if (GameOverContent.activeSelf)
+            {
+                // player.ResetPosition();
+                // car.ResetPosition();
+                GameOverContent.SetActive(false);
+                StartContent.SetActive(true);
+                raceScene.CloseScene();
+            }
+            if (TryAgainContent.activeSelf)
+            {
+                player.ResetPosition();
+                car.ResetPosition();
+                car.StartCarDriving();
+                TryAgainContent.SetActive(false);
+                MainPanel.SetActive(false);
+            }
+
             Time.timeScale = 1;
         }
     }
+
+    public void OpenStartPanel()
+    {
+        car.StopCarDriving();
+        MainPanel.SetActive(true);
+        StartContent.SetActive(true);
+        player.ResetPosition();
+        car.ResetPosition();
+    }
+
     public void GameOver()
     {
-        Time.timeScale = 0;
+        car.StopCarDriving();
         MainPanel.SetActive(true);
         GameOverContent.SetActive(true);
+        SoundManager.Instance.PlayGameOverSoundEffect();
     }
 
     public void Win()
     {
-        Time.timeScale = 0;
+        car.StopCarDriving();
         MainPanel.SetActive(true);
         WinContent.SetActive(true);
+        SoundManager.Instance.PlayWinSoundEffect();
     }
 
     public void TryAgain()
     {
-        Time.timeScale = 0;
+        car.StopCarDriving();
         MainPanel.SetActive(true);
         TryAgainContent.SetActive(true);
-
+        SoundManager.Instance.PlayGameOverSoundEffect();
     }
 
     public void UpdateState(int life)

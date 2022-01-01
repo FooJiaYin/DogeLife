@@ -50,8 +50,6 @@ public class RaceGameManager : MonoBehaviour
         }
         else
         {
-            player.Reset();
-            car.Reset();
             RaceUIManager.Instance.TryAgain();
         }
     }

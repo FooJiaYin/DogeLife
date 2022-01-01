@@ -8,6 +8,7 @@ public class StartGamePanel : MonoBehaviour
 {
     [SerializeField] TMP_InputField m_nameInput;
     [SerializeField] Button m_startBtn;
+    public CanvasGroup canvasGroup;
 
     public string PlayerName;
 

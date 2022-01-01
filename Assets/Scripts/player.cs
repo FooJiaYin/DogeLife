@@ -12,6 +12,7 @@ public class player : NetworkBehaviour
     const int HEALTH_MAX = 20;
     const int FOOD_DECREASE_TIME = 10; // every 10 seconds -1
     float timePassed = 0f;
+    public bool isPlaying = true;
     [SyncVar]
     public string name;
     [SyncVar(hook = nameof(updateLevel))]
@@ -54,6 +55,7 @@ public class player : NetworkBehaviour
 
     [SerializeField] PlayerHintBox hintBox;
     [SerializeField] Animation hintBoxAnimation;
+    [SerializeField] Animator playerAnimator;
 
     public override void OnStartLocalPlayer()
     {
@@ -61,19 +63,23 @@ public class player : NetworkBehaviour
         if (vcam != null) VirtualCamera = vcam.GetComponent<CinemachineVirtualCamera>();
         VirtualCamera.Follow = this.transform;
     }
+    private static player _instance;
+    public static player Instance { get { return _instance; } }
+    private void Awake()
+    {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            _instance = this;
+        }
+    }
 
     void Start()
     {
-        rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
-        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
-        emptyMan = GameObject.Find("EmptyManAndPlace").GetComponent<ManController>();
-        emptyPlace = GameObject.Find("EmptyManAndPlace").GetComponent<PlaceController>();
-        waitingMan = emptyMan;
-        enteredPlace = emptyPlace;
-        volume = GameObject.Find("Volume").GetComponent<Volume>();
-        playerScoreBoard = GameObject.Find("UI - Score board").GetComponent<PlayerScoreBoard>();
-        playerTaskBoard = GameObject.Find("UI - Tasks board").GetComponent<TaskBoard>();
-        levelHintBoard = GameObject.Find("UI - Level Hint").GetComponent<LevelHintBoard>();
+        onSceneLoaded();
 
         Color[] colors = { Color.yellow, Color.green, Color.blue, Color.red, Color.cyan, Color.magenta };
         if (isLocalPlayer)
@@ -86,7 +92,22 @@ public class player : NetworkBehaviour
         SetLevel(1);
         updateLevel(1, level);
     }
+    public void onSceneLoaded()
+    {
+        Debug.Log("player setup");
+        rigidbody2D = gameObject.GetComponent<Rigidbody2D>();
+        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        emptyMan = GameObject.Find("EmptyManAndPlace").GetComponent<ManController>();
+        emptyPlace = GameObject.Find("EmptyManAndPlace").GetComponent<PlaceController>();
+        waitingMan = emptyMan;
+        enteredPlace = emptyPlace;
+        volume = GameObject.Find("Volume").GetComponent<Volume>();
+        playerScoreBoard = GameObject.Find("UI - Score board").GetComponent<PlayerScoreBoard>();
+        Debug.Log(playerScoreBoard.name);
+        playerTaskBoard = GameObject.Find("UI - Tasks board").GetComponent<TaskBoard>();
+        levelHintBoard = GameObject.Find("UI - Level Hint").GetComponent<LevelHintBoard>();
 
+    }
     void InitPlayerName()
     {
         string[] names = { "Tom", "Bob", "Alice", "Mikasa", "Alan", "John", "Mary", "Patrick" };
@@ -98,6 +119,11 @@ public class player : NetworkBehaviour
 
     void Update()
     {
+        if (!isPlaying)
+        {
+            movement = Vector2.zero;
+            return;
+        }
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
         if (level >= 2 && enteredPlace != emptyPlace)
@@ -107,11 +133,12 @@ public class player : NetworkBehaviour
                 startPTime = Time.time;
                 isPeeing = true;
                 peeingBar.gameObject.SetActive(true);
-                Debug.Log("start pee" + startPTime);
+                SoundManager.Instance.PlayPeeingSoundEffect();
 
             }
             if (Input.GetKeyUp(KeyCode.P))
             {
+                SoundManager.Instance.StopPeeingSoundEffect();
                 if (Time.time - startPTime > enteredPlace.ptime)
                 {
                     enteredPlace.setOwner(this, netId);
@@ -120,6 +147,7 @@ public class player : NetworkBehaviour
                     SetEmptyPlace();
                     isPeeing = false;
                     peeingBar.gameObject.SetActive(false);
+                    SoundManager.Instance.PlayFinishPeeingSoundEffect();
                 }
                 else
                 {
@@ -138,9 +166,24 @@ public class player : NetworkBehaviour
             {
                 if (waitingMan.active)
                 {
-                    int addScore = waitingMan.actions[waitingMan.activeAction].score;
-                    AddSocialValue(addScore);
-                    PlayHintAnimation(0, 0, 0, addScore);
+                    Action action = waitingMan.actions[waitingMan.activeAction];
+                    AddSocialValue(action.score);
+                    switch (action.reaction)
+                    {
+                        case Action.Reaction.Lay:
+                            playerAnimator.SetTrigger("Lay");
+                            Debug.Log("Lay");
+                            break;
+                        case Action.Reaction.Shake:
+                            playerAnimator.SetTrigger("Shake");
+                            Debug.Log("Shake");
+                            break;
+                        case Action.Reaction.Bark:
+                            SoundManager.Instance.PlayBarkSoundEffect();
+                            break;
+
+                    }
+                    PlayHintAnimation(0, 0, 0, action.score);
                     waitingMan.unsetActiveAction();
                 }
                 SetEmptyMan();
@@ -153,10 +196,13 @@ public class player : NetworkBehaviour
             timePassed = 0;
             AddFoodValue(-1);
         }
+
     }
     private void FixedUpdate()
     {
         rigidbody2D.MovePosition(rigidbody2D.position + movement * movespeed * Time.fixedDeltaTime);
+        if (movement != Vector2.zero) playerAnimator.SetBool("Moving", true);
+        else playerAnimator.SetBool("Moving", false);
     }
     public void SetEmptyMan()
     {
@@ -271,6 +317,8 @@ public class player : NetworkBehaviour
     {
         Debug.Log("Cmd set level");
         level = value;
+        playerAnimator.SetInteger("Level", value);
+        playerAnimator.SetTrigger("ChangeLevel");
     }
 
     public void updateLevel(int oldLevel, int newLevel)
@@ -289,11 +337,16 @@ public class player : NetworkBehaviour
             playerScoreBoard.PlaceValue = placeValue;
         }
 
+        //playerAnimator.SetInteger("Level", newLevel);
         playerScoreBoard.Level = newLevel;
         playerTaskBoard.SetTaskWithLevel(newLevel);
         spriteRenderer.sprite = sprites[newLevel - 1];
         volumeDisplay.gameObject.SetActive(newLevel == 4);
-        if (newLevel >= oldLevel) levelHintBoard.ShowHintBoard(newLevel, 1);
+        if (newLevel >= oldLevel)
+        {
+            levelHintBoard.ShowHintBoard(newLevel, 1);
+            if (newLevel != 1) SoundManager.Instance.PlayLevelUpSoundEffect();
+        }
         else levelHintBoard.ShowHintBoard(newLevel, -1);
     }
 

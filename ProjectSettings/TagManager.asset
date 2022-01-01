@@ -6,11 +6,12 @@ TagManager:
   tags:
   - Virtual Camera
   - Car
+  - Race Camera
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Race Game
   - Water
   - UI
   - 
@@ -42,4 +43,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: RaceScene
+    uniqueID: 456574495
     locked: 0

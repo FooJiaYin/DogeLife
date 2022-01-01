@@ -8,6 +8,7 @@ public class PKRankingBoard : MonoBehaviour
 {
     public Text rankDisplay;
 
+    public CanvasGroup canvasGroup;
 
 
 }

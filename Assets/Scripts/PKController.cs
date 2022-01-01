@@ -18,11 +18,24 @@ public class PKController : NetworkBehaviour
     float nextDetectTime;
     [SyncVar(hook = nameof(setStatus))]
     bool active = false;
+    bool countDown = false;
     public List<player> players;
     float[] totalVolume;
+    // private static PKController _instance;
+
+    // public static PKController Instance { get { return _instance; } }
 
     void Start()
     {
+
+        // if (_instance != null && _instance != this)
+        // {
+        //     Destroy(this.gameObject);
+        // }
+        // else
+        // {
+        //     _instance = this;
+        // }
         wall.SetActive(false);
         //RpcSetRank("Wait to start");
     }
@@ -80,10 +93,16 @@ public class PKController : NetworkBehaviour
                 startTime = Time.time;
                 totalVolume = new float[players.Count];
                 nextDetectTime = Time.time + sensitivity;
+                countDown = false;
             }
             else
             {
                 statusText.text = "preparing " + (startTime - Time.time).ToString("f2");
+                if (!countDown)
+                {
+                    SoundManager.Instance.PlayCountDownSoundEffect();
+                    countDown = true;
+                }
             }
         }
     }
@@ -128,7 +147,8 @@ public class PKController : NetworkBehaviour
             player p = other.gameObject.GetComponent<player>();
             if (p.Level < 4) return;
             players.Add(p);
-            rankingDisplay.gameObject.SetActive(true);
+            //rankingDisplay.gameObject.SetActive(true);
+            rankingDisplay.canvasGroup.alpha = 1;
         }
     }
 
@@ -138,7 +158,8 @@ public class PKController : NetworkBehaviour
         if (other.tag == "Player")
         {
             players.Remove(other.GetComponent<player>());
-            rankingDisplay.gameObject.SetActive(false);
+            //rankingDisplay.gameObject.SetActive(false);
+            rankingDisplay.canvasGroup.alpha = 0;
         }
     }
 }
