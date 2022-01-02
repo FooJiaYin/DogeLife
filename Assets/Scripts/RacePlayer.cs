@@ -22,8 +22,16 @@ public class RacePlayer : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space)) Jump();
-        else if (Input.GetKeyDown(KeyCode.R)) UpdateRunStatus(runStatus.keyR);
-        else if (Input.GetKeyDown(KeyCode.N)) UpdateRunStatus(runStatus.keyN);
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            UpdateRunStatus(runStatus.keyR);
+            playerAnimator.SetBool("Walking", true);
+        }
+        else if (Input.GetKeyDown(KeyCode.N))
+        {
+            UpdateRunStatus(runStatus.keyN);
+            playerAnimator.SetBool("Walking", false);
+        }
     }
 
     void UpdateRunStatus(runStatus newStatus)
@@ -34,15 +42,6 @@ public class RacePlayer : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (movement != Vector2.zero)
-        {
-            playerAnimator.SetBool("Walking", true);
-        }
-        else
-        {
-            playerAnimator.SetBool("Walking", false);
-
-        }
         Vector2 newPos = rigidbody2D.position + movement * Time.fixedDeltaTime;
         if (newPos.y > startPos.y + 1.5f) newPos.y = startPos.y + 1.5f;
         rigidbody2D.MovePosition(newPos);

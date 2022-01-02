@@ -10,7 +10,7 @@ public class player : NetworkBehaviour
 {
     const int FOOD_MAX = 20;
     const int HEALTH_MAX = 20;
-    const int FOOD_DECREASE_TIME = 10; // every 10 seconds -1
+    const int FOOD_DECREASE_TIME = 5; // every 10 seconds -1
     float timePassed = 0f;
     public bool isPlaying = true;
     [SyncVar]
@@ -152,12 +152,12 @@ public class player : NetworkBehaviour
                 else
                 {
                     isPeeing = false;
-                    peeingBar.UpdatePeeingBar(0);
+                    peeingBar.UpdatePeeingBar(0, Color.black);
                     peeingBar.gameObject.SetActive(false);
                 }
 
             }
-            if (isPeeing) peeingBar.UpdatePeeingBar((Time.time - startPTime) / enteredPlace.ptime);
+            if (isPeeing) peeingBar.UpdatePeeingBar((Time.time - startPTime) / enteredPlace.ptime, placeColor);
 
         }
         if (level >= 3 && waitingMan != emptyMan)
@@ -173,16 +173,20 @@ public class player : NetworkBehaviour
                         case Action.Reaction.Lay:
                             playerAnimator.SetTrigger("Lay");
                             Debug.Log("Lay");
+                            if (level > 3) SoundManager.Instance.PlayBarkSound2Effect();
                             break;
                         case Action.Reaction.Shake:
                             playerAnimator.SetTrigger("Shake");
                             Debug.Log("Shake");
+                            if (level > 3) SoundManager.Instance.PlayBarkSound2Effect();
                             break;
                         case Action.Reaction.Bark:
-                            SoundManager.Instance.PlayBarkSoundEffect();
+                            if (level > 3) SoundManager.Instance.PlayBarkSound2Effect();
+                            else SoundManager.Instance.PlayBarkSoundEffect();
                             break;
 
                     }
+                    if (level > 3) SoundManager.Instance.PlayBarkSound2Effect();
                     PlayHintAnimation(0, 0, 0, action.score);
                     waitingMan.unsetActiveAction();
                 }
@@ -336,8 +340,6 @@ public class player : NetworkBehaviour
             placeValue = 0;
             playerScoreBoard.PlaceValue = placeValue;
         }
-
-        //playerAnimator.SetInteger("Level", newLevel);
         playerScoreBoard.Level = newLevel;
         playerTaskBoard.SetTaskWithLevel(newLevel);
         spriteRenderer.sprite = sprites[newLevel - 1];
@@ -347,7 +349,11 @@ public class player : NetworkBehaviour
             levelHintBoard.ShowHintBoard(newLevel, 1);
             if (newLevel != 1) SoundManager.Instance.PlayLevelUpSoundEffect();
         }
-        else levelHintBoard.ShowHintBoard(newLevel, -1);
+        else
+        {
+            levelHintBoard.ShowHintBoard(newLevel, -1);
+            SoundManager.Instance.PlayGameOverSoundEffect();
+        }
     }
 
     public void PlayHintAnimation(int eatValue, int healthValue, int placeValue, int socialValue)

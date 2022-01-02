@@ -13,10 +13,12 @@ public class RaceGameEnter : MonoBehaviour
     {
 
         GameObject player = GameObject.FindWithTag("Player");
-        //player.transform.position = player.transform.position + Vector3.one * 2;
+        player p = null;
         if (!opened)
         {
-            if (player != null) player.GetComponent<player>().isPlaying = false;
+            if (player != null) p = player.GetComponent<player>();
+            //if (p.Level != 5) return;
+            p.isPlaying = false;
             raceScene.OpenScene();
             opened = true;
         }

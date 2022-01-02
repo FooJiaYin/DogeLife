@@ -43,19 +43,16 @@ public class RaceUIManager : MonoBehaviour
                 StartContent.SetActive(false);
                 MainPanel.SetActive(false);
                 car.StartCarDriving();
+                SoundManager.Instance.PlayCarStartSoundEffect();
             }
             if (WinContent.activeSelf)
             {
-                // player.ResetPosition();
-                // car.ResetPosition();
                 WinContent.SetActive(false);
                 StartContent.SetActive(true);
                 raceScene.CloseScene();
             }
             if (GameOverContent.activeSelf)
             {
-                // player.ResetPosition();
-                // car.ResetPosition();
                 GameOverContent.SetActive(false);
                 StartContent.SetActive(true);
                 raceScene.CloseScene();
@@ -67,6 +64,7 @@ public class RaceUIManager : MonoBehaviour
                 car.StartCarDriving();
                 TryAgainContent.SetActive(false);
                 MainPanel.SetActive(false);
+                SoundManager.Instance.PlayCarStartSoundEffect();
             }
 
             Time.timeScale = 1;

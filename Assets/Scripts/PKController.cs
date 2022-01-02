@@ -54,13 +54,14 @@ public class PKController : NetworkBehaviour
                 if (players.Count == 0) return;
                 if (players.Count == 1)
                 {
-                    if (totalVolume[0] > 10)
+                    if (totalVolume[0] > 15)
                     {
                         players[0].SetLevel(5);
                     }
                     else
                     {
                         players[0].AddSocialValue(-1);
+                        players[0].PlayHintAnimation(0, 0, 0, -1);
                     }
                 }
                 else
@@ -68,7 +69,11 @@ public class PKController : NetworkBehaviour
                     for (int i = 0; i < players.Count; i++)
                     {
                         if (i == 0) players[i].SetLevel(5);
-                        else players[i].AddSocialValue(-1);
+                        else
+                        {
+                            players[i].AddSocialValue(-1);
+                            players[i].PlayHintAnimation(0, 0, 0, -1);
+                        }
                     }
                 }
             }

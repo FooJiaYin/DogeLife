@@ -24,10 +24,8 @@ public class RaceCar : MonoBehaviour
 
         RacePlayer player = other.gameObject.GetComponent<RacePlayer>();
         if (player == null) return;
-        if (player.Position.y >= Position.y)
-        {
-            RaceGameManager.Instance.Win();
-        }
+        RaceGameManager.Instance.Win();
+
     }
 
     public void ResetPosition()

@@ -14,8 +14,10 @@ public class SoundManager : MonoBehaviour
     [SerializeField] AudioClip levelUp;
     [SerializeField] AudioClip CountDown;
     [SerializeField] AudioClip barking;
+    [SerializeField] AudioClip barking2;
     [SerializeField] AudioClip Win;
     [SerializeField] AudioClip Lose;
+    [SerializeField] AudioClip CarStart;
     private void Awake()
     {
         if (_instance != null && _instance != this)
@@ -64,6 +66,10 @@ public class SoundManager : MonoBehaviour
     {
         audioSource.PlayOneShot(barking, 1.0f);
     }
+    public void PlayBarkSound2Effect()
+    {
+        audioSource.PlayOneShot(barking2, 1.0f);
+    }
 
     public void PlayWinSoundEffect()
     {
@@ -73,6 +79,11 @@ public class SoundManager : MonoBehaviour
     public void PlayGameOverSoundEffect()
     {
         audioSource.PlayOneShot(Lose, 1.0f);
+    }
+
+    public void PlayCarStartSoundEffect()
+    {
+        audioSource.PlayOneShot(CarStart, 1.0f);
     }
 
 }

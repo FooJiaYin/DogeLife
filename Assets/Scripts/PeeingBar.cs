@@ -15,9 +15,17 @@ public class PeeingBar : MonoBehaviour
         totalWidth = totalBar.size.x;
         totalHeight = totalBar.size.y;
     }
-    public void UpdatePeeingBar(float completeness)
+    public void UpdatePeeingBar(float completeness, Color color)
     {
-        if (completeness > 1) completeness = 1;
+        if (completeness > 1)
+        {
+            completeness = 1;
+            fillBar.color = color;
+        }
+        else
+        {
+            if (color != null) fillBar.color = Color.black;
+        }
         fillBar.size = new Vector2(totalWidth * completeness, totalHeight);
     }
 }
