@@ -9,6 +9,7 @@ public class PlayerScoreBoard : MonoBehaviour
     const float HealthValueMax = 20;
     const int BarMaxWidth = 150;
     const int BarMaxHeight = 12;
+    public string playerName;
 
     [SerializeField] Image picture;
     [SerializeField] Sprite[] sprites;
@@ -24,8 +25,15 @@ public class PlayerScoreBoard : MonoBehaviour
 
     [SerializeField] Image foodBarColor;
     [SerializeField] Image healthBarColor;
+    public StartGamePanel startGamePanel;
 
     float foodValue = 10;
+
+    void Start()
+    {
+        startGamePanel = FindObjectOfType<StartGamePanel>();
+    }
+
     public float FoodValue
     {
         get { return foodValue; }
@@ -81,8 +89,10 @@ public class PlayerScoreBoard : MonoBehaviour
 
     public void SetPlayerName(string name)
     {
+        playerName = name;
         PlayerNameDisplay.text = name;
     }
+
     void SetFoodValue()
     {
         foodValueDisplay.text = foodValue + " / " + HealthValueMax;
@@ -120,5 +130,4 @@ public class PlayerScoreBoard : MonoBehaviour
         picture.sprite = sprites[level - 1];
         levelValueDisplay.text = "LV " + level;
     }
-
 }

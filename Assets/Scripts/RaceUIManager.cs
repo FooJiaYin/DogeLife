@@ -6,19 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class RaceUIManager : MonoBehaviour
 {
-    private static RaceUIManager _instance = null;
-    public static RaceUIManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                GameObject newManager = new GameObject();
-                _instance = newManager.AddComponent<RaceUIManager>();
-            }
-            return _instance;
-        }
-    }
     public GameObject[] lifeObjects;
     [SerializeField] GameObject MainPanel;
     [SerializeField] GameObject StartContent;
@@ -28,11 +15,6 @@ public class RaceUIManager : MonoBehaviour
     public RacePlayer player;
     public RaceCar car;
     public RaceScene raceScene;
-
-    void Awake()
-    {
-        _instance = this;
-    }
 
     void Update()
     {
@@ -49,13 +31,15 @@ public class RaceUIManager : MonoBehaviour
             {
                 WinContent.SetActive(false);
                 StartContent.SetActive(true);
-                raceScene.CloseScene();
+                raceScene.CloseScene(true);
+                //TODO: add monument
             }
             if (GameOverContent.activeSelf)
             {
                 GameOverContent.SetActive(false);
                 StartContent.SetActive(true);
-                raceScene.CloseScene();
+                raceScene.CloseScene(false);
+                // to level 4
             }
             if (TryAgainContent.activeSelf)
             {

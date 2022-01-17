@@ -9,24 +9,28 @@ public class RaceScene : MonoBehaviour
     [SerializeField] GameObject RaceCamera;
     [SerializeField] RaceUIManager raceUIManager;
     [SerializeField] RaceGameEnter raceEnter;
-    [SerializeField] player mainPlayer;
-    public void OpenScene()
+    [SerializeField] RaceGameManager raceGameManager;
+    player mainPlayer;
+    public void OpenScene(player p)
     {
+        raceGameManager.InitLives();
         this.gameObject.SetActive(true);
         foreach (CanvasGroup ui in UIs) { ui.alpha = 0; }
         MainCamera.SetActive(false);
         RaceCamera.SetActive(true);
         raceUIManager.OpenStartPanel();
+        mainPlayer = p;
     }
 
-    public void CloseScene()
+    public void CloseScene(bool hasWon)
     {
         this.gameObject.SetActive(false);
         foreach (CanvasGroup ui in UIs) { ui.alpha = 1; }
         MainCamera.SetActive(true);
         RaceCamera.SetActive(false);
         raceEnter.SetRaceSceneClosed();
-        GameObject player = GameObject.FindWithTag("Player");
-        if (player != null) player.GetComponent<player>().isPlaying = true;
+        if (mainPlayer != null) mainPlayer.isPlaying = true;
+        if (hasWon && mainPlayer != null) mainPlayer.CmdAddMonument();
+        else mainPlayer.SetLevel(4);
     }
 }

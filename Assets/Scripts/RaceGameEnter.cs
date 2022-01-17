@@ -12,15 +12,18 @@ public class RaceGameEnter : MonoBehaviour
     void OnTriggerEnter2D(Collider2D other)
     {
 
-        GameObject player = GameObject.FindWithTag("Player");
-        player p = null;
-        if (!opened)
+        if (other.tag == "Player")
         {
-            if (player != null) p = player.GetComponent<player>();
-            //if (p.Level != 5) return;
-            p.isPlaying = false;
-            raceScene.OpenScene();
-            opened = true;
+            GameObject player = other.gameObject;
+            player p = null;
+            if (!opened)
+            {
+                if (player != null) p = player.GetComponent<player>();
+                if (!p.IsLocalPlayer || p.Level != 5) return;
+                p.isPlaying = false;
+                raceScene.OpenScene(p);
+                opened = true;
+            }
         }
     }
 

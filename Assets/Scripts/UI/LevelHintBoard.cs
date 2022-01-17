@@ -56,9 +56,9 @@ public class LevelHintBoard : MonoBehaviour
             case 1:
                 return "Find healthy food to eat,\nbad food makes me sick : (\nMake me full to level up!";
             case 2:
-                return "If I pee at there, then it's my PLACE!\nGather 6 PLACE to level up!\nBTW... I still need food to keep alive";
+                return "If I pee at there, then it's my PLACE!\nGather 5 PLACE to level up!\nBTW... I still need food to keep alive";
             case 3:
-                return "I want to play with people!\nGet 6 LOVE from them to level up!\nBut I still need space and food...";
+                return "I want to play with people!\nGet 5 LOVE from them to level up!\nBut I still need space and food...";
             case 4:
                 return "I'm the best barking dog in the world.\nI'll become GOD if I win the game!\nFood and space are still important : )";
             case 5:

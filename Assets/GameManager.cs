@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Mirror;
 
 public class GameManager : NetworkBehaviour
@@ -19,7 +18,6 @@ public class GameManager : NetworkBehaviour
             _instance = this;
         }
     }
-    // 以後再寫Inspector
     public GameObject food;
     public ManController mans;
     public GameObject PKArea;
@@ -27,7 +25,6 @@ public class GameManager : NetworkBehaviour
     float[] nextManSwpanTimes;
     foodSpawner[] foodSpawners;
     manSpawner[] manSpawners;
-    // Start is called before the first frame update
     void getSpawners()
     {
         foodSpawners = FindObjectsOfType<foodSpawner>();
@@ -37,33 +34,15 @@ public class GameManager : NetworkBehaviour
     void SpawnFood(GameObject food, int foodTypeIndex, int foodSpawnerIndex)
     {
         var newFood = foodSpawners[foodSpawnerIndex].SpawnFood(food, foodTypeIndex);
-        // NetworkClient.RegisterPrefab(newFood);
         if (newFood != null) NetworkServer.Spawn(newFood);
     }
     void SpawnMan(GameObject man)
     {
         var manSpawnerIndex = Random.Range(0, manSpawners.Length);
     }
-
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
     void Start()
     {
         _instance = this;
-        setup();
-        NetworkServer.Spawn(PKArea);
-    }
-
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        setup();
-    }
-
-    public void setup()
-    {
-        Debug.Log("Setup");
         getSpawners();
         int numOfFood = (int)FoodType.NumOfFood;
         nextFoodSwpanTimes = new float[numOfFood];
@@ -71,8 +50,8 @@ public class GameManager : NetworkBehaviour
         {
             nextFoodSwpanTimes[i] = Time.time;
         }
+        if (isServer) NetworkServer.Spawn(PKArea);
     }
-
 
     // Update is called once per frame
     void Update()

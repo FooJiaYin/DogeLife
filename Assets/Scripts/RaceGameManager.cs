@@ -19,6 +19,7 @@ public class RaceGameManager : MonoBehaviour
         }
     }
     int lives = 3;
+    [SerializeField] RaceUIManager raceUIManager;
 
     [SerializeField] RacePlayer player;
     [SerializeField] RaceCar car;
@@ -33,24 +34,30 @@ public class RaceGameManager : MonoBehaviour
     public void Lose()
     {
         lives--;
-        RaceUIManager.Instance.UpdateState(lives);
+        raceUIManager.UpdateState(lives);
         CheckGameState();
     }
 
     public void Win()
     {
-        RaceUIManager.Instance.Win();
+        raceUIManager.Win();
     }
 
     void CheckGameState()
     {
         if (lives <= 0)
         {
-            RaceUIManager.Instance.GameOver();
+            raceUIManager.GameOver();
         }
         else
         {
-            RaceUIManager.Instance.TryAgain();
+            raceUIManager.TryAgain();
         }
+    }
+
+    public void InitLives()
+    {
+        lives = 3;
+        raceUIManager.UpdateState(lives);
     }
 }

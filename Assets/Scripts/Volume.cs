@@ -55,24 +55,27 @@ public class Volume : MonoBehaviour
             // 取得的樣本數量
             int sampleSize = 128;
             float[] samples = new float[sampleSize];
-            int startPosition = Microphone.GetPosition(device[devicePos]) - (sampleSize + 1);
-            // 得到資料
-            this.m_AudioSource.clip.GetData(samples, startPosition);
-            microphoneSamles = samples;
-
-            // Getting a peak on the last 128 samples
-            float levelMax = 0;
-            for (int i = 0; i < sampleSize; i++)
+            if (device.Length > 0)
             {
-                float wavePeek = samples[i];
-                if (levelMax < wavePeek)
+                int startPosition = Microphone.GetPosition(device[devicePos]) - (sampleSize + 1);
+                // 得到資料
+                this.m_AudioSource.clip.GetData(samples, startPosition);
+                microphoneSamles = samples;
+
+                // Getting a peak on the last 128 samples
+                float levelMax = 0;
+                for (int i = 0; i < sampleSize; i++)
                 {
-                    levelMax = wavePeek;
+                    float wavePeek = samples[i];
+                    if (levelMax < wavePeek)
+                    {
+                        levelMax = wavePeek;
+                    }
                 }
+                return levelMax * 99;
+                // }
             }
-            return levelMax * 99;
-            // }
-            // return 0;
+            return 0;
         }
 
     }

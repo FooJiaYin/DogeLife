@@ -11,12 +11,14 @@ public class PlaceController : NetworkBehaviour
     [SyncVar(hook = nameof(updateOwner))]
     public uint ownerId;
     public float ptime = 5;
+    public float maxSize = 1.0f;
+    public float minSize = 0.7f;
     Renderer renderer;
     // Start is called before the first frame update
     void Start()
     {
         renderer = GetComponent<Renderer>();
-        if (ownerId != 0) updateOwner(0, ownerId);
+        updateOwner(0, ownerId);
     }
 
     // Update is called once per frame
@@ -34,7 +36,7 @@ public class PlaceController : NetworkBehaviour
 
     public void updateOwner(uint oldOwnerId, uint newOwnerId)
     {
-        Debug.Log("updateOwner " + newOwnerId + "," + oldOwnerId);
+        Debug.Log("updateOwner " + gameObject.name + " " + oldOwnerId + "->" + newOwnerId);
         // Debug.Log(NetworkServer.spawned[newOwnerId]);
         // foreach (KeyValuePair<uint, NetworkIdentity> p in NetworkServer.spawned)
         // {
@@ -46,23 +48,32 @@ public class PlaceController : NetworkBehaviour
         // }
         // owner = NetworkServer.spawned[newOwnerId].gameObject.GetComponent<player>();
         // owner.AddPlaceValue(ownerValue);
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        for (int i = 0; i < players.Length; i++)
+        ownerId = newOwnerId;
+        if (newOwnerId == 0)
         {
-            /*
-            if (players[i].GetComponent<NetworkIdentity>().netId == oldOwnerId)
-            {
-                player oldOwner = players[i].GetComponent<player>();
-                oldOwner.AddPlaceValue(-ownerValue);
-            }
-            */
-            if (players[i].GetComponent<NetworkIdentity>().netId == newOwnerId)
-            {
-                owner = players[i].GetComponent<player>();
-                //owner.AddPlaceValue(ownerValue);
-            }
+            if (owner != null) owner.AddPlaceValue(-ownerValue);
+            owner = null;
+            renderer.material.color = Color.white;
         }
-        renderer.material.color = owner.placeColor;
+        else
+        {
+
+            if (owner != null)
+            {
+                owner.AddPlaceValue(-ownerValue);
+            }
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            for (int i = 0; i < players.Length; i++)
+            {
+                if (players[i].GetComponent<NetworkIdentity>().netId == newOwnerId)
+                {
+                    owner = players[i].GetComponent<player>();
+                    owner.AddPlaceValue(ownerValue);
+                }
+            }
+            if (owner != null) renderer.material.color = owner.placeColor;
+            else renderer.material.color = Color.white;
+        }
     }
 
     public void setOwner(player newOwner, uint newOwnerId)
@@ -74,20 +85,27 @@ public class PlaceController : NetworkBehaviour
                 owner.AddPlaceValue(-ownerValue);
             }
             owner = newOwner;
-            renderer.material.color = owner.placeColor;
-            owner.AddPlaceValue(ownerValue);
-            owner.PlayHintAnimation(0, 0, ownerValue, 0);
-            ownerId = newOwnerId;
+            if (newOwner != null)
+            {
+                renderer.material.color = owner.placeColor;
+                owner.AddPlaceValue(ownerValue);
+                owner.PlayHintAnimation(0, 0, ownerValue, 0);
+            }
+            else
+            {
+                renderer.material.color = Color.white;
+            }
             CmdSetOwner(newOwnerId);
         }
     }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.tag == "Player")
         {
             other.GetComponent<player>().enteredPlace = this;
             Debug.Log("place set!");
-            this.gameObject.transform.localScale = Vector3.one;
+            this.gameObject.transform.localScale = Vector3.one * maxSize;
         }
     }
     private void OnTriggerExit2D(Collider2D other)
@@ -96,7 +114,7 @@ public class PlaceController : NetworkBehaviour
         {
             other.GetComponent<player>().SetEmptyPlace();
             Debug.Log("place unset!");
-            this.gameObject.transform.localScale = Vector3.one * 0.7f;
+            this.gameObject.transform.localScale = Vector3.one * minSize;
 
         }
     }

@@ -11,7 +11,7 @@ public class PeeingBar : MonoBehaviour
 
     void Start()
     {
-        if (totalBar == null) fillBar = GameObject.Find("Pee Bar").GetComponent<SpriteRenderer>();
+        if (totalBar == null) fillBar = this.transform.Find("Pee Bar").GetComponent<SpriteRenderer>();
         totalWidth = totalBar.size.x;
         totalHeight = totalBar.size.y;
     }

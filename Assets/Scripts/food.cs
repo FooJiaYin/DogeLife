@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
 public enum FoodType
 {
@@ -64,9 +65,11 @@ public static class FoodTypeExtensions
         }
     }
 }
-public class Food : MonoBehaviour
+public class Food : NetworkBehaviour
 {
-    [SerializeField] FoodType m_foodType = FoodType.None;
+    [SerializeField]
+    [SyncVar(hook = nameof(UpdateFoodType))]
+    FoodType m_foodType = FoodType.None;
     [SerializeField] Sprite[] m_foodSprites;
     [SerializeField] SpriteRenderer m_foodSpriteRenderer;
     public float foodSpawnInterval = 2;
@@ -76,6 +79,11 @@ public class Food : MonoBehaviour
         m_foodType = (FoodType)foodTypeIndex;
         if (m_foodType != FoodType.None) m_foodSpriteRenderer.sprite = m_foodSprites[foodTypeIndex];
     }
+
+    void UpdateFoodType(FoodType oldFoodType, FoodType newFoodType)
+    {
+        if (newFoodType != FoodType.None) m_foodSpriteRenderer.sprite = m_foodSprites[(int)newFoodType];
+    }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.tag == "Player")
@@ -84,7 +92,6 @@ public class Food : MonoBehaviour
             plyr.AddFoodValue(m_foodType.FoodFullValue());
             plyr.AddHealthValue(m_foodType.FoodHealthValue());
             plyr.PlayHintAnimation(m_foodType.FoodFullValue(), m_foodType.FoodHealthValue(), 0, 0);
-            SoundManager.Instance.PlayFoodEatenSoundEffect();
         }
         Destroy(gameObject);
     }

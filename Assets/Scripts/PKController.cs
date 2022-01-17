@@ -42,14 +42,13 @@ public class PKController : NetworkBehaviour
 
     void Update()
     {
-        if (!isServer) return;
         if (active)
         {
+            statusText.text = "playing " + (startTime + duration - Time.time).ToString("f2");
             if (Time.time > startTime + duration)
             {
+                if (!isServer) return;
                 active = false;
-                statusText.text = "preparing...";
-                wall.SetActive(false);
                 startTime = Time.time + interval;
                 if (players.Count == 0) return;
                 if (players.Count == 1)
@@ -86,26 +85,23 @@ public class PKController : NetworkBehaviour
                     GetRank();
                 }
             }
-            statusText.text = "playing " + (duration - Time.time + startTime).ToString("f2");
         }
         else
         {
+            statusText.text = "preparing " + (startTime - Time.time).ToString("f2");
+            if (!isServer) return;
             if (Time.time > startTime)
             {
                 active = true;
-                statusText.text = "playing " + (duration - Time.time + startTime).ToString("f2");
-                wall.SetActive(true);
                 startTime = Time.time;
                 totalVolume = new float[players.Count];
-                nextDetectTime = Time.time + sensitivity;
                 countDown = false;
             }
             else
             {
-                statusText.text = "preparing " + (startTime - Time.time).ToString("f2");
                 if (!countDown)
                 {
-                    SoundManager.Instance.PlayCountDownSoundEffect();
+                    if (!isServer) SoundManager.Instance.PlayCountDownSoundEffect();
                     countDown = true;
                 }
             }
@@ -117,10 +113,12 @@ public class PKController : NetworkBehaviour
         if (newStatus)
         {
             wall.SetActive(true);
+            startTime = Time.time;
         }
         else
         {
             wall.SetActive(false);
+            startTime = Time.time + interval;
         }
     }
 
@@ -146,25 +144,26 @@ public class PKController : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!isServer) return;
+
         if (other.gameObject.tag == "Player")
         {
             player p = other.gameObject.GetComponent<player>();
             if (p.Level < 4) return;
+            p.ShowRankingDisplay(true);
+            if (!isServer) return;
             players.Add(p);
-            //rankingDisplay.gameObject.SetActive(true);
-            rankingDisplay.canvasGroup.alpha = 1;
         }
     }
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!isServer) return;
         if (other.tag == "Player")
         {
+            player p = other.gameObject.GetComponent<player>();
+            p.ShowRankingDisplay(false);
+            if (!isServer) return;
             players.Remove(other.GetComponent<player>());
             //rankingDisplay.gameObject.SetActive(false);
-            rankingDisplay.canvasGroup.alpha = 0;
         }
     }
 }

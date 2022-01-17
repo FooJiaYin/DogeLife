@@ -11,8 +11,9 @@ public class foodSpawner : MonoBehaviour
     {
         if (m_food == null && !hasPlayer)
         {
-            m_food = Instantiate(food, this.transform.position, this.transform.rotation, this.transform);
+            m_food = Instantiate(food, this.transform.position, this.transform.rotation);
             m_food.GetComponent<Food>().SetFoodType(foodTypeIndex);
+            Debug.Log("SpawnFood");
             return m_food;
         }
         else

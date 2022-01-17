@@ -24,6 +24,7 @@ public class TaskBoard : MonoBehaviour
 
     public void SetTaskWithLevel(int newLevel)
     {
+        Debug.Log("Hint:" + newLevel);
         if (newLevel < 0) return;
         level = newLevel;
         for (int i = 0; i < tasks.Length; i++) tasks[i].gameObject.SetActive(tasks[i].LevelisActive[newLevel - 1]);

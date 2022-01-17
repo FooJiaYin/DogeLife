@@ -58,6 +58,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlayCountDownSoundEffect()
     {
+        if (countDownAudioSource == null) return;
         countDownAudioSource.clip = CountDown;
         countDownAudioSource.PlayDelayed(2.0f);
     }

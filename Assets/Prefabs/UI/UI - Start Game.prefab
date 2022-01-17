@@ -672,7 +672,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -862,7 +862,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_nameInput: {fileID: 1841887410771187703}
   m_startBtn: {fileID: 5468617107916000728}
-  canvasGroup: {fileID: 5185731988695987732}
   PlayerName: 
 --- !u!225 &5185731988695987732
 CanvasGroup:
